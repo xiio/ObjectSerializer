@@ -73,6 +73,9 @@ class Hydrator
     {
         $thief = function ($object) use ($data, $mapping) {
             foreach ($data as $fieldName => $value) {
+                if (!property_exists($object, $fieldName)) {
+                    continue;
+                }
                 if ($mapping && $mapping->has($fieldName)) {
                     $object->{$fieldName} = MappingResolver::resolveType($mapping->get($fieldName), $value);
                 } else {
