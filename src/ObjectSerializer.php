@@ -4,7 +4,6 @@ namespace xiio\ObjectSerializer;
 
 use xiio\ObjectSerializer\Exception\FormatNotFoundException;
 use xiio\ObjectSerializer\Filter\FilterInterface;
-use xiio\ObjectSerializer\Hydration\Hydrator;
 use xiio\ObjectSerializer\Serialization\ArraySerializer;
 use xiio\ObjectSerializer\Serialization\JsonSerializer;
 use xiio\ObjectSerializer\Serialization\SerializerInterface;
@@ -27,10 +26,11 @@ class ObjectSerializer
      * @param null $filter
      *
      * @return string
+     * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function serializeToJson($object, $filter = null)
+    public function serializeToJson($object, $filter = null): string
     {
-        return json_encode(Hydrator::extract($object, $filter));
+        return $this->serialize($object, JsonSerializer::FORMAT, $filter);
     }
 
     /**
@@ -38,10 +38,11 @@ class ObjectSerializer
      * @param null $filter
      *
      * @return array
+     * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function serializeToArray($object, $filter = null)
+    public function serializeToArray($object, $filter = null): array
     {
-        return Hydrator::extract($object, $filter);
+        return $this->serialize($object, ArraySerializer::FORMAT, $filter);
     }
 
     /**
@@ -49,6 +50,7 @@ class ObjectSerializer
      * @param string $format
      * @param \xiio\ObjectSerializer\Filter\FilterInterface|null $filter
      *
+     * @return mixed
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
     public function serialize($object, string $format, FilterInterface $filter = null)
@@ -56,7 +58,8 @@ class ObjectSerializer
         if (!array_key_exists($format, $this->serializers)) {
             throw new FormatNotFoundException(sprintf("Serialization format %s is not supported.", $format));
         }
-        $this->serializers[$format]->serialize($object, $filter);
+
+        return $this->serializers[$format]->serialize($object, $filter);
     }
 
     /**
