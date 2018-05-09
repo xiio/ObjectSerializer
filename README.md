@@ -126,6 +126,7 @@ Unit testing is provided by phpspec.
 MIT
 
 ## TODO
+* Rewrite filters mechanism to handle data filtering
 * Mapping using dot notation for deep nested properties.
 * Mapping property names.
 * Filtering properties by name using wildard.
