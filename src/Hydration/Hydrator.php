@@ -76,7 +76,7 @@ class Hydrator
                 if (!property_exists($object, $fieldName)) {
                     continue;
                 }
-                if ($mapping && $mapping->has($fieldName)) {
+                if ($mapping && $mapping->has($fieldName) && $value !== null) {
                     $object->{$fieldName} = MappingResolver::resolveType($mapping->get($fieldName), $value);
                 } else {
                     $object->{$fieldName} = $value;
