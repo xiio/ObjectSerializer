@@ -6,7 +6,6 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use spec\xiio\ObjectSerializer\Fixtures\NestedObject;
 use spec\xiio\ObjectSerializer\Fixtures\TestObject;
-use xiio\ObjectSerializer\Filter\PropertyFilter;
 use xiio\ObjectSerializer\Mapping\PropertyMapper;
 use xiio\ObjectSerializer\Mapping\Type\ObjectProperty;
 
@@ -25,27 +24,6 @@ class HydratorSpec extends ObjectBehavior
         self::extract($testObject)['nestedObject']->shouldHaveCount(2);
         self::extract($testObject)['nestedObject']->shouldHaveKeyWithValue('subField', 'sub field');
         self::extract($testObject)['nestedObject']->shouldHaveKeyWithValue('subFieldArray', ['a', 'b', 'c']);
-    }
-
-    function it_can_extract_properties_from_object_with_filtering(PropertyFilter $filter)
-    {
-        $filter->hasField('publicField')->willReturn(true);
-        $filter->isExcluded('publicField')->willReturn(true);
-        $filter->isExcluded('protectedField')->willReturn(false);
-        $filter->isExcluded('privateField')->willReturn(false);
-        $filter->isExcluded('nestedObject')->willReturn(false);
-
-        $testObject = new TestObject();
-        self::extract($testObject, $filter)->shouldBeArray();
-        self::extract($testObject, $filter)->shouldHaveCount(3);
-        self::extract($testObject, $filter)->shouldNotHaveKey('publicField');
-        self::extract($testObject, $filter)->shouldHaveKeyWithValue('protectedField', 'protected');
-        self::extract($testObject, $filter)->shouldHaveKeyWithValue('privateField', 'private');
-        self::extract($testObject, $filter)->shouldHaveKey('nestedObject');
-        self::extract($testObject, $filter)['nestedObject']->shouldBeArray();
-        self::extract($testObject, $filter)['nestedObject']->shouldHaveCount(2);
-        self::extract($testObject, $filter)['nestedObject']->shouldHaveKeyWithValue('subField', 'sub field');
-        self::extract($testObject, $filter)['nestedObject']->shouldHaveKeyWithValue('subFieldArray', ['a', 'b', 'c']);
     }
 
     function it_can_populate_array_to_object(PropertyMapper $mapper, ObjectProperty $mappingType)

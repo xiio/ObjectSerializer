@@ -4,6 +4,7 @@ namespace xiio\ObjectSerializer;
 
 use xiio\ObjectSerializer\Exception\FormatNotFoundException;
 use xiio\ObjectSerializer\Filter\FilterInterface;
+use xiio\ObjectSerializer\Mapping\PropertyMapper;
 use xiio\ObjectSerializer\Serialization\ArraySerializer;
 use xiio\ObjectSerializer\Serialization\JsonSerializer;
 use xiio\ObjectSerializer\Serialization\SerializerInterface;
@@ -65,12 +66,12 @@ class ObjectSerializer
     /**
      * @param string $data
      * @param string $class
-     * @param null $mapping
+     * @param PropertyMapper $mapping
      *
      * @return object
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function deserializeJson(string $data, string $class, $mapping = null)
+    public function deserializeJson(string $data, string $class, PropertyMapper $mapping = null)
     {
         return $this->deserialize($data, JsonSerializer::FORMAT, $class, $mapping);
     }
@@ -78,12 +79,12 @@ class ObjectSerializer
     /**
      * @param array $data
      * @param string $class
-     * @param null $mapping
+     * @param PropertyMapper $mapping
      *
      * @return mixed
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function deserializeArray(array $data, string $class, $mapping = null)
+    public function deserializeArray(array $data, string $class, PropertyMapper $mapping = null)
     {
         return $this->deserialize($data, ArraySerializer::FORMAT, $class, $mapping);
     }
@@ -92,12 +93,12 @@ class ObjectSerializer
      * @param $data
      * @param string $format
      * @param string $class
-     * @param null $mapping
+     * @param PropertyMapper $mapping
      *
      * @return mixed
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function deserialize($data, string $format, string $class, $mapping = null)
+    public function deserialize($data, string $format, string $class, PropertyMapper $mapping = null)
     {
         if (!array_key_exists($format, $this->serializers)) {
             throw new FormatNotFoundException(sprintf("Deserialization format %s is not supported.", $format));

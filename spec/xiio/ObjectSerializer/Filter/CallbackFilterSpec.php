@@ -3,29 +3,27 @@
 namespace spec\xiio\ObjectSerializer\Filter;
 
 use PhpSpec\ObjectBehavior;
-use xiio\ObjectSerializer\Exception\InvalidCallbackException;
+use spec\xiio\ObjectSerializer\Fixtures\TestObject;
 
 class CallbackFilterSpec extends ObjectBehavior
 {
-
-    function it_can_filter_using_callback()
+    function it_can_filter_fields_using_callable()
     {
-        $callback = function ($fieldname) {
-            return $fieldname === 'test_field';
+        $filterCallback = function (array $objectData) {
+            unset($objectData['removeThisField']);
+            $objectData['changeThisField'] = 'changed';
+
+            return $objectData;
         };
+        $testPayload = [
+            'leaveThisField' => '',
+            'removeThisField' => '',
+            'changeThisField' => '',
+        ];
+        $this->beConstructedWith(TestObject::class, $filterCallback);
 
-        $this->beConstructedWith($callback);
-
-        $this->isExcluded('test_field')->shouldReturn(true);
-        $this->isExcluded('test_field_1')->shouldReturn(false);
-    }
-
-    function it_should_throw_error_on_invalid_callback()
-    {
-        $this->beConstructedWith(null);
-        $this->shouldThrow(InvalidCallbackException::class)->duringInstantiation();
-
-        $this->beConstructedWith(true);
-        $this->shouldThrow(InvalidCallbackException::class)->duringInstantiation();
+        $this->filter($testPayload)->shouldHaveCount(2);
+        $this->filter($testPayload)->shouldHaveKeyWithValue('leaveThisField', '');
+        $this->filter($testPayload)->shouldHaveKeyWithValue('changeThisField', 'changed');
     }
 }

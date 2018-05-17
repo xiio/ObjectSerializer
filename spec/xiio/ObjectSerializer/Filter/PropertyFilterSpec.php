@@ -3,37 +3,72 @@
 namespace spec\xiio\ObjectSerializer\Filter;
 
 use PhpSpec\ObjectBehavior;
+use spec\xiio\ObjectSerializer\Fixtures\TestObject;
 use xiio\ObjectSerializer\Filter\PropertyFilter;
 
 class PropertyFilterSpec extends ObjectBehavior
 {
-    function it_is_initializable()
+
+    function it_should_know_supperted_object(TestObject $testObject, \stdClass $notSupportedObject)
     {
-        $this->shouldHaveType(PropertyFilter::class);
+        $this->beConstructedWith(TestObject::class, PropertyFilter::STRATEGY_BLACKLIST);
+        $this->supports($testObject)->shouldReturn(true);
+        $this->supports($notSupportedObject)->shouldReturn(false);
     }
 
-    function it_can_set_fields_to_filter()
+    function it_can_remove_specific_fields()
     {
-        $this->setField('test_field');
-        $this->setField('test_field_1');
-        $this->setField('test_field_2');
+        $this->beConstructedWith(TestObject::class, PropertyFilter::STRATEGY_BLACKLIST);
+        $testPayload = [
+            'removeThisField' => '',
+            'leaveThisField' => '',
+            'leaveThisFieldToo' => '',
+        ];
 
-        $this->isExcluded('test_field')->shouldReturn(true);
-        $this->isExcluded('test_field_1')->shouldReturn(true);
-        $this->isExcluded('test_field_2')->shouldReturn(true);
-        $this->isExcluded('test_field_3')->shouldReturn(false);
+        $this->addField('removeThisField');
+        $this->filter($testPayload)->shouldHaveCount(2);
+        $this->filter($testPayload)->shouldNotHaveKey('removeThisField');
+        $this->filter($testPayload)->shouldHaveKey('leaveThisField');
+        $this->filter($testPayload)->shouldHaveKey('leaveThisFieldToo');
     }
 
-    function it_can_disable_filter_for_field()
+    function it_can_leave_specific_fields()
     {
-        $this->setField('test_field');
-        $this->setField('test_field_1');
-        $this->setField('test_field_2');
+        $this->beConstructedWith(TestObject::class, PropertyFilter::STRATEGY_WHITELIST);
+        $testPayload = [
+            'leaveThisField' => '',
+            'removeThisField' => '',
+            'removeThisFieldToo' => '',
+        ];
 
-        $this->setField('test_field_2', false);
-        $this->isExcluded('test_field')->shouldReturn(true);
-        $this->isExcluded('test_field_1')->shouldReturn(true);
-        $this->isExcluded('test_field_2')->shouldReturn(false);
-        $this->isExcluded('test_field_3')->shouldReturn(false);
+        $this->addField('leaveThisField');
+        $this->filter($testPayload)->shouldHaveCount(1);
+        $this->filter($testPayload)->shouldHaveKey('leaveThisField');
+        $this->filter($testPayload)->shouldNotHaveKey('removeThisField');
+        $this->filter($testPayload)->shouldNotHaveKey('removeThisFieldToo');
+    }
+
+    function it_should_remove_all_fields_when_none_specified_on_whitelist_mode()
+    {
+        $this->beConstructedWith(TestObject::class, PropertyFilter::STRATEGY_WHITELIST);
+        $testPayload = [
+            'leaveThisField' => '',
+            'removeThisField' => '',
+            'removeThisFieldToo' => '',
+        ];
+
+        $this->filter($testPayload)->shouldHaveCount(0);
+    }
+
+    function it_should_leave_all_fields_when_none_specified_on_blacklist_mode()
+    {
+        $this->beConstructedWith(TestObject::class, PropertyFilter::STRATEGY_BLACKLIST);
+        $testPayload = [
+            'leaveThisField' => '',
+            'removeThisField' => '',
+            'removeThisFieldToo' => '',
+        ];
+
+        $this->filter($testPayload)->shouldHaveCount(3);
     }
 }

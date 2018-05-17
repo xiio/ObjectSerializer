@@ -29,10 +29,10 @@ class Hydrator
             $objectVars = get_object_vars($object);
             $result = [];
             foreach ($objectVars as $fieldName => $value) {
-                if ($filter && $filter->isExcluded($fieldName)) {
-                    continue;
-                }
                 $result[$fieldName] = Hydrator::extractComplex($value);
+            }
+            if ($filter && $filter->supports($object)) {
+                $result = $filter->filter($result);
             }
 
             return $result;
