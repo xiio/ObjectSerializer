@@ -22,8 +22,8 @@ class MappingResolver
                 return Hydrator::deserialize($value, $type->getType());
             case 'class_array':
                 $result = [];
-                foreach ($value as $row) {
-                    $result[] = Hydrator::deserialize($row, $type->getType());
+                foreach ($value as $key => $row) {
+                    $result[$key] = Hydrator::deserialize($row, $type->getType());
                 }
 
                 return $result;
