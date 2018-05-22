@@ -3,11 +3,8 @@
 
 namespace xiio\ObjectSerializer\Hydration;
 
-use Doctrine\Instantiator\Instantiator;
 use Psr\Log\InvalidArgumentException;
 use xiio\ObjectSerializer\Filter\FilterInterface;
-use xiio\ObjectSerializer\Mapping\MappingResolver;
-use xiio\ObjectSerializer\Mapping\PropertyMapper;
 
 class Hydrator
 {
@@ -43,6 +40,30 @@ class Hydrator
     }
 
     /**
+     * Fill object with data
+     *
+     * @param array $data
+     * @param $object
+     *
+     * @return mixed
+     */
+    public static function populate(array $data, $object)
+    {
+        $thief = function ($object, $data) {
+            $objectVars = get_class_vars(get_class($object));
+            foreach ($objectVars as $objectVarName => $varValue) {
+                if (!array_key_exists($objectVarName, $data)) {
+                    continue;
+                }
+                $object->{$objectVarName} = $data[$objectVarName];
+            }
+        };
+        \Closure::bind($thief, null, $object)($object, $data);
+
+        return $object;
+    }
+
+    /**
      * It extracts data according to input type. Ex. object, array of objects.
      *
      * @param $value
@@ -58,50 +79,5 @@ class Hydrator
         } else {
             return is_object($value) ? Hydrator::extract($value) : $value;
         }
-    }
-
-    /**
-     * Fill object with data
-     *
-     * @param array $data
-     * @param $object
-     * @param \xiio\ObjectSerializer\Mapping\PropertyMapper $mapping
-     *
-     * @return mixed
-     */
-    public static function populate(array $data, $object, PropertyMapper $mapping = null)
-    {
-        $thief = function ($object) use ($data, $mapping) {
-            foreach ($data as $fieldName => $value) {
-                if (!property_exists($object, $fieldName)) {
-                    continue;
-                }
-                if ($mapping && $mapping->has($fieldName) && $value !== null) {
-                    $object->{$fieldName} = MappingResolver::resolveType($mapping->get($fieldName), $value);
-                } else {
-                    $object->{$fieldName} = $value;
-                }
-            }
-        };
-        \Closure::bind($thief, null, $object)($object);
-
-        return $object;
-    }
-
-    /**
-     * Creates an instance of class and populate data to it
-     *
-     * @param array $data
-     * @param string $class
-     * @param null $mapping
-     *
-     * @return object Instance of given class
-     */
-    public static function deserialize(array $data, string $class, $mapping = null)
-    {
-        $instantiator = new Instantiator();
-        $resultObject = $instantiator->instantiate($class);
-
-        return static::populate($data, $resultObject, $mapping);
     }
 }

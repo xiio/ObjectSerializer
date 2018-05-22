@@ -30,7 +30,8 @@ class Order
         $this->items = $items;
     }
 
-    public function setUser(User $user) {
+    public function setUser(User $user)
+    {
         $this->user = $user;
     }
 }
@@ -38,6 +39,35 @@ class Order
 class Item
 {
     private $name;
+
+    /**
+     * @var ItemPrice
+     */
+    public $price;
+
+    /**
+     * Item constructor.
+     *
+     * @param $name
+     * @param \ItemPrice $price
+     */
+    public function __construct($name, ItemPrice $price)
+    {
+        $this->name = $name;
+        $this->price = $price;
+    }
+}
+
+class ItemPrice
+{
+    private $value;
+    private $currency;
+
+    public function __construct($value, $currency)
+    {
+        $this->value = $value;
+        $this->currency = $currency;
+    }
 }
 
 class User
@@ -112,35 +142,50 @@ There is two types right now:
 
 ```php
 $serializer = new ObjectSerializer();
-$order = new Order("ASDF123", 123, [['name' => 'item1'], ['name' => 'item2']]);
+
+$item1 = new Item('item1', new ItemPrice(22, 'USD'));
+$item2 = new Item('item2', new ItemPrice(11, 'EUR'));
+$order = new Order("ASDF123", 123, [
+    $item1,
+    $item2,
+]);
 $order->setUser(new User('dev@email'));
 $data = $serializer->serializeToJson($order);
-echo $data; // {"id":"ASDF123","sum":123,"items":[{"name":"item1"},{"name":"item2"}],"user":{"email":"dev@email"}}
+echo $data;
+//{
+//  "id": "ASDF123",
+//  "sum": 123,
+//  "items": [
+//    {
+//      "name": "item1",
+//      "price": {
+//        "value": 22,
+//        "currency": "USD"
+//      }
+//    },
+//    {
+//      "name": "item2",
+//      "price": {
+//        "value": 11,
+//        "currency": "EUR"
+//      }
+//    }
+//  ],
+//  "user": {
+//    "email": "dev@email"
+//  }
+//}
 
-$mapper = new PropertyMapper();
-$mapper->mapClass('user', User::class);
-$mapper->mapArray('items', Item::class);
 
-$recoveredOrder = $serializer->deserializeJson($data, Order::class, $mapper);
+$mapping = MappingFactory::createObjectMapping(Order::class);
+$mapping->mapClass('user', User::class);
+$mapping->mapArray('items', Item::class);
+$mapping->mapClass('items.price', ItemPrice::class);
+
+$recoveredOrder = $serializer->deserializeJson($data, $mapping);
+var_dump($recoveredOrder->user); // is object "User"
 var_dump($recoveredOrder->items); // is array of objects "Item"
-var_dump($recoveredOrder->user); // is array of objects "Item"
-
-//    array(2) {
-//      [0]=>
-//      object(Item)#20 (1) {
-//        ["name":"Item":private]=>
-//        string(5) "item1"
-//      }
-//      [1]=>
-//      object(Item)#23 (1) {
-//        ["name":"Item":private]=>
-//        string(5) "item2"
-//      }
-//    }
-//    object(User)#26 (1) {
-//      ["email":"User":private]=>
-//      string(9) "dev@email"
-//    }
+var_dump($recoveredOrder->items[0]->price); // is object "ItemPrice"
 ```
 
 ## Test
@@ -151,8 +196,8 @@ Unit testing is provided by phpspec.
 MIT
 
 ## TODO
-* Mapping using dot notation for deep nested properties.
 * Mapping property names.
+* Support serialize array of objects
 
 ## Known issues
-* not yet possible to set mapping for deep nested properties. (\>2 nesting lvl)
+* cannot serialize array of objects

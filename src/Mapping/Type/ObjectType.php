@@ -4,18 +4,17 @@ namespace xiio\ObjectSerializer\Mapping\Type;
 
 use xiio\ObjectSerializer\Exception\ClassNotFoundException;
 
-class ObjectProperty implements MappingType
+class ObjectType implements MappingType
 {
-
-    const TYPE = 'class';
 
     /**
      * @var string
      */
     private $class;
 
+
     /**
-     * @param $class
+     * @param string $class
      *
      * @throws \xiio\ObjectSerializer\Exception\ClassNotFoundException
      */
@@ -31,14 +30,6 @@ class ObjectProperty implements MappingType
     public function getType(): string
     {
         return $this->class;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTypeName(): string
-    {
-        return static::TYPE;
     }
 
     /**

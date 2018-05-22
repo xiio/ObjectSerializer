@@ -4,7 +4,7 @@ namespace xiio\ObjectSerializer\Serialization;
 
 use xiio\ObjectSerializer\Filter\FilterInterface;
 use xiio\ObjectSerializer\Hydration\Hydrator;
-use xiio\ObjectSerializer\Mapping\PropertyMapper;
+use xiio\ObjectSerializer\Mapping\Mapping;
 
 final class ArraySerializer implements SerializerInterface
 {
@@ -24,14 +24,14 @@ final class ArraySerializer implements SerializerInterface
 
     /**
      * @param array $arrayData
-     * @param string $class
-     * @param \xiio\ObjectSerializer\Mapping\PropertyMapper|null $mapping
+     * @param \xiio\ObjectSerializer\Mapping\Mapping|null $mapping
      *
      * @return object
+     * @throws \xiio\ObjectSerializer\Exception\MappingNotFoundException
      */
-    public function deserialize($arrayData, string $class, PropertyMapper $mapping = null)
+    public function deserialize($arrayData, Mapping $mapping = null)
     {
-        return Hydrator::deserialize($arrayData, $class, $mapping);
+        return Deserializer::deserialize($arrayData, $mapping);
     }
 
     public function getFormatName(): string

@@ -5,7 +5,7 @@ namespace xiio\ObjectSerializer\Serialization;
 use xiio\ObjectSerializer\Exception\InvalidJsonException;
 use xiio\ObjectSerializer\Filter\FilterInterface;
 use xiio\ObjectSerializer\Hydration\Hydrator;
-use xiio\ObjectSerializer\Mapping\PropertyMapper;
+use xiio\ObjectSerializer\Mapping\Mapping;
 
 final class JsonSerializer implements SerializerInterface
 {
@@ -23,18 +23,18 @@ final class JsonSerializer implements SerializerInterface
     }
 
     /**
-     * @param string $jsonData
-     * @param string $class
-     * @param \xiio\ObjectSerializer\Mapping\PropertyMapper|null $mapping
+     * @param $jsonData
+     * @param \xiio\ObjectSerializer\Mapping\Mapping|null $mapping
      *
-     * @return object
+     * @return array|mixed|object
      * @throws \xiio\ObjectSerializer\Exception\InvalidJsonException
+     * @throws \xiio\ObjectSerializer\Exception\MappingNotFoundException
      */
-    public function deserialize($jsonData, string $class, PropertyMapper $mapping = null)
+    public function deserialize($jsonData, Mapping $mapping = null)
     {
         $this->assertJson($jsonData);
 
-        return Hydrator::deserialize(json_decode($jsonData, true), $class, $mapping);
+        return Deserializer::deserialize(json_decode($jsonData, true), $mapping);
     }
 
     public function getFormatName(): string

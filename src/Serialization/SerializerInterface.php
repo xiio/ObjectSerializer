@@ -3,7 +3,7 @@
 namespace xiio\ObjectSerializer\Serialization;
 
 use xiio\ObjectSerializer\Filter\FilterInterface;
-use xiio\ObjectSerializer\Mapping\PropertyMapper;
+use xiio\ObjectSerializer\Mapping\Mapping;
 
 interface SerializerInterface
 {
@@ -17,12 +17,11 @@ interface SerializerInterface
 
     /**
      * @param $data
-     * @param string $class
-     * @param \xiio\ObjectSerializer\Mapping\PropertyMapper|null $mapping
+     * @param \xiio\ObjectSerializer\Mapping\Mapping|null $mapping
      *
      * @return mixed
      */
-    public function deserialize($data, string $class, PropertyMapper $mapping = null);
+    public function deserialize($data, Mapping $mapping = null);
 
     /**
      * @return string
