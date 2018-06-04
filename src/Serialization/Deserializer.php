@@ -50,7 +50,7 @@ class Deserializer
         $result = [];
         foreach ($data as $fieldName => $item) {
             $fieldPath = $parentName.$fieldName;
-            if ($mapping->has($fieldPath)) {
+            if ($item !== null && $mapping->has($fieldPath)) {
                 if ($mapping->isArrayOfObjects($fieldPath)) {
                     $result[$fieldName] = [];
                     foreach ($item as $key => $row) {
