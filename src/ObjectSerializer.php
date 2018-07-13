@@ -24,24 +24,24 @@ class ObjectSerializer
 
     /**
      * @param $object
-     * @param null $filter
+     * @param \xiio\ObjectSerializer\Filter\FilterInterface $filter
      *
      * @return string
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function serializeToJson($object, $filter = null): string
+    public function serializeToJson($object, FilterInterface $filter = null): string
     {
         return $this->serialize($object, JsonSerializer::FORMAT, $filter);
     }
 
     /**
      * @param $object
-     * @param null $filter
+     * @param \xiio\ObjectSerializer\Filter\FilterInterface $filter
      *
      * @return array
      * @throws \xiio\ObjectSerializer\Exception\FormatNotFoundException
      */
-    public function serializeToArray($object, $filter = null): array
+    public function serializeToArray($object, FilterInterface $filter = null): array
     {
         return $this->serialize($object, ArraySerializer::FORMAT, $filter);
     }

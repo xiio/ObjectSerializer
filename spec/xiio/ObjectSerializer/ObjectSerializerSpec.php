@@ -48,6 +48,7 @@ class ObjectSerializerSpec extends ObjectBehavior
         ];
 
         $mapping->has(Argument::any())->willReturn(false);
+        $mapping->isArrayOfObjects()->willReturn(false);
         $mapping->isObject()->willReturn(true);
         $mapping->getType()->willReturn(TestObject::class);
 
@@ -70,6 +71,7 @@ class ObjectSerializerSpec extends ObjectBehavior
         ];
 
         $mapping->isObject()->willReturn(true);
+        $mapping->isArrayOfObjects()->willReturn(false);
         $mapping->getType()->willReturn(Order::class);
         $mapping->has('items')->willReturn(true);
         $mapping->getType('items')->willReturn(OrderItem::class);
@@ -112,6 +114,7 @@ class ObjectSerializerSpec extends ObjectBehavior
             ],
         ];
         $mapping->isObject()->willReturn(true);
+        $mapping->isArrayOfObjects()->willReturn(false);
         $mapping->getType()->willReturn(TestObject::class);
         $mapping->has('nestedObject')->willReturn(true);
         $mapping->has(Argument::any())->willReturn(false);
@@ -127,6 +130,49 @@ class ObjectSerializerSpec extends ObjectBehavior
             ->getNestedObject()->getSubFieldArray()->shouldBe(['d', 'e', 'f']);
     }
 
+    function it_can_deserialize_from_array_of_object(Mapping $mapping)
+    {
+        $array = [
+            [
+                'publicField' => 'deserialized public',
+                'protectedField' => 'deserialized protected',
+                'privateField' => 'deserialized private',
+            ],
+            [
+                'publicField' => 'deserialized public 1',
+                'protectedField' => 'deserialized protected 1',
+                'privateField' => 'deserialized private 1',
+            ],
+            [
+                'publicField' => 'deserialized public 2',
+                'protectedField' => 'deserialized protected 2',
+                'privateField' => 'deserialized private 2',
+            ],
+        ];
+
+        $mapping->has(Argument::any())->willReturn(false);
+        $mapping->isArrayOfObjects()->willReturn(true);
+        $mapping->isObject()->willReturn(true);
+        $mapping->getType()->willReturn(TestObject::class);
+
+        $this->deserializeArray($array, $mapping)->shouldBeArray();
+        $this->deserializeArray($array, $mapping)[0]->shouldBeAnInstanceOf(TestObject::class);
+        $this->deserializeArray($array, $mapping)[1]->shouldBeAnInstanceOf(TestObject::class);
+        $this->deserializeArray($array, $mapping)[2]->shouldBeAnInstanceOf(TestObject::class);
+
+        $this->deserializeArray($array, $mapping)[0]->getPublicField()->shouldBe('deserialized public');
+        $this->deserializeArray($array, $mapping)[0]->getProtectedField()->shouldBe('deserialized protected');
+        $this->deserializeArray($array, $mapping)[0]->getPrivateField()->shouldBe('deserialized private');
+
+        $this->deserializeArray($array, $mapping)[1]->getPublicField()->shouldBe('deserialized public 1');
+        $this->deserializeArray($array, $mapping)[1]->getProtectedField()->shouldBe('deserialized protected 1');
+        $this->deserializeArray($array, $mapping)[1]->getPrivateField()->shouldBe('deserialized private 1');
+
+        $this->deserializeArray($array, $mapping)[2]->getPublicField()->shouldBe('deserialized public 2');
+        $this->deserializeArray($array, $mapping)[2]->getProtectedField()->shouldBe('deserialized protected 2');
+        $this->deserializeArray($array, $mapping)[2]->getPrivateField()->shouldBe('deserialized private 2');
+    }
+
     function it_can_serialize_to_json()
     {
         $object = new TestObject();
@@ -139,6 +185,7 @@ class ObjectSerializerSpec extends ObjectBehavior
         $json = '{"publicField":"deserialized public","protectedField":"deserialized protected","privateField":"deserialized private","nestedObject":{"subField":"deserialized sub field","subFieldArray":["d","e","f"]}}';
 
         $mapping->isObject()->willReturn(true);
+        $mapping->isArrayOfObjects()->willReturn(false);
         $mapping->getType()->willReturn(TestObject::class);
         $mapping->has(Argument::any())->willReturn(false);
 
@@ -162,6 +209,7 @@ class ObjectSerializerSpec extends ObjectBehavior
         $mapping->has(Argument::any())->willReturn(false);
 
         $mapping->isObject()->willReturn(true);
+        $mapping->isArrayOfObjects()->willReturn(false);
         $mapping->getType()->willReturn(TestObject::class);
         $mapping->isArrayOfObjects('nestedObject')->willReturn(false);
         $mapping->isObject('nestedObject')->willReturn(true);

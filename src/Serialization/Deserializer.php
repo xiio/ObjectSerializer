@@ -19,17 +19,17 @@ class Deserializer
      */
     public static function deserialize(array $data, Mapping $mapping = null)
     {
-        if ($mapping->isObject()) {
+        if ($mapping->isArrayOfObjects()) {
+            $result = [];
+            foreach ($data as $key => $item) {
+                $deserialized = static::deserializeData($item, $mapping);
+                $object = static::createInstance($mapping->getType());
+                $result[$key] = Hydrator::populate($deserialized, $object);
+            }
+        } elseif ($mapping->isObject()) {
             $result = static::deserializeData($data, $mapping);
             $object = static::createInstance($mapping->getType());
             $result = Hydrator::populate($result, $object);
-        } elseif ($mapping->isArrayOfObjects()) {
-            $result = [];
-            foreach ($data as $key => $item) {
-                $result = static::deserializeData($item, $mapping);
-                $object = static::createInstance($mapping->getType());
-                $result[$key] = Hydrator::populate($result, $object);
-            }
         } else {
             $result = $data;
         }
